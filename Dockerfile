@@ -1,6 +1,5 @@
-FROM scratch
-
-WORKDIR /app
-ADD ./hello-world /app/hello-world
-
-CMD [ "/app/hello-world" ]
+FROM golang:alpine
+ADD ./src /go/src/app
+WORKDIR /go/src/app
+ENV PORT=3001
+CMD ["go", "run", "main.go"]
