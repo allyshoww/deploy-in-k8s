@@ -15,12 +15,12 @@ pipeline {
         srvH2 = '10.225.35.170'
         user1 = 'peter-parker'
         user2 = 'tony-stark'
-        DOCKER_TAG = getDockerTag()
+        //DOCKER_TAG = getDockerTag()
     }
     stages{
         stage('Build Docker Image'){
             steps{
-                sh "docker build . -t allysono/golang-helloworld${DOCKER_TAG} "
+                sh "docker build . -t allysono/golang-helloworld"
             }
         }
         stage('DockerHub Push'){
