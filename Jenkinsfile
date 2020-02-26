@@ -1,54 +1,55 @@
+def registry = "allysono/deploy-in-k8s"
+def registryCredential = 'docker-hub'
+
+def listServers = [
+ srvH1: [name:"srvH1", user: 'peter-parker', ip: "10.225.35.106"],
+ srvH2: [name:"srvH2", user: 'tony-stark', ip: "10.225.35.107"],
+ srvH3: [name:"srvH3", user: 'hulk', ip: "10.225.35.108"]
+]  
+
 pipeline {
     agent any
+    
     parameters{
         choice(name:'Ambiente',
             choices:'srvH1\nsrvH2\nsrvH3\n',
             description: 'Qual ambiente de homologação você vai utilizar?'
             )
-        choice(name:'Usuário',
-            choices:'adesouzaoliv\nakofazu\n',
-            description: 'Qual o usuario que você vai utilizar?'
-            )
     }
     environment{
-        srvH1 = '10.225.35.106'
-        srvH2 = '10.225.35.170'
-        user1 = 'peter-parker'
-        user2 = 'tony-stark'
-        //DOCKER_TAG = getDockerTag()
+        srvH1 = "${listServers.srvH1.name}"
+        srvH2 = "${listServers.srvH2.name}"
+        srvH3 = "${listServers.srvH3.name}"
+ 
     }
-    stages{
-        stage('Build Docker Image'){
+
+ stages{
+        stage('Docker Build  Image'){
             steps{
-                sh "docker build . -t allysono/golang-helloworld"
-            }
-        }
-        stage('DockerHub Push'){
-            steps{
-                withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
-                    sh "docker login -u allysono -p ${dockerHubPwd}"
-                    sh "docker push allysono/helloworld:${DOCKER_TAG}"
+                script {
+                    appimage = docker.build registry + ":" + getDockerTag()
                 }
             }
         }
+        stage('Docker Push  Image'){
+            steps{
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                        appimage.push()
+                        appimage.push('latest')
+                   }
+               }
+           }
+        }
+        
         stage('Deploy to Kubernetes'){
             steps{
                 sshagent(credentials: ['jenkins']) {
 				    script{
-                        if (params.Ambiente == 'srvH1'){
-                            load "${params.Ambiente}/print.sh"
-                            load "${params.Ambiente}/app.properties"
-                            sh 'cd "srvH1/" && cp app.properties ../'
+                            sh "cp deploy/${params.Ambiente}/*.properties app.properties"
+                            sh "ssh -o StrictHostKeyChecking=no ${listServers.find{ it.key == params.Ambiente }?.value.user}@${listServers.find{ it.key == params.Ambiente }?.value.ip} -p 2222 'kubectl create -f golang-helloworld.yaml'"
                             sh 'cat app.properties'
-                            sh "ssh -o StrictHostKeyChecking=no '${user1}'@10.225.35.106 '${run.Cmd}'"
-						    def runCmd = "sudo microk8s.kubectl create -f golang-helloworld.yaml"
-                        } else if (params.Ambiente == 'srvH2'){
-                            load "${params.Ambiente}/print.sh"
-                            sh 'cd "srvH2/" && cp app.properties ../'
-                            sh 'cat app.properties'
-                        } else {
-                            echo "Servidor errado"
-                        }
+                       
 					}
 				}
             }
