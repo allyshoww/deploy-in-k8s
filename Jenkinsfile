@@ -47,7 +47,7 @@ pipeline {
                 sshagent(credentials: ['jenkins']) {
 				    script{
                             sh "cp deploy/${params.Ambiente}/*.properties app.properties"
-                            sh "ssh -o StrictHostKeyChecking=no ${listServers.find{ it.key == params.Ambiente }?.value.user}@${listServers.find{ it.key == params.Ambiente }?.value.ip} -p 2222 'kubectl create -f golang-helloworld.yaml'"
+                            sh "ssh -o StrictHostKeyChecking=no ${listServers.find{ it.key == params.Ambiente }?.value.user}@${listServers.find{ it.key == params.Ambiente }?.value.ip} -p 22 'kubectl create -f golang-helloworld.yaml'"
                             sh 'cat app.properties'
                        
 					}
