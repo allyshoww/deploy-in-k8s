@@ -28,6 +28,10 @@ pipeline {
     }
 
  stages{
+        stage ('Clone do repositório') {
+            checkout scm
+        }
+        
         stage('Docker Build  Image'){
             steps{
                 script {
