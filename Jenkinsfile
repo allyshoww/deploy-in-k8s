@@ -25,7 +25,7 @@ pipeline {
             description: 'Qual usuário você vai utilizar?'
             )
         choice(name: "teste",
-            choices:${list}
+            choices:${list},
             description: 'Teste')
     }
     environment{
