@@ -31,7 +31,7 @@ pipeline {
         stage('Docker Build  Image'){
             steps{
                 script {
-                    appimage = docker.build . registry + ":" + getDockerTag()
+                    appimage = docker.build registry + ":" + getDockerTag()
                 }
             }
         }
