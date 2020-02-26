@@ -16,8 +16,9 @@ pipeline {
             description: 'Qual ambiente de homologação você vai utilizar?'
             )
         choice(name:'User',
-            choices:'peter-parker\ntony-stark\nhulk\n'
-            description: 'Qual usuário você vai utilizar?')
+            choices:'peter-parker\ntony-stark\nhulk\n',
+            description: 'Qual usuário você vai utilizar?'
+            )
     }
     environment{
         srvH1 = "${listServers.srvH1.name}"
