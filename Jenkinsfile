@@ -1,6 +1,11 @@
 def registry = "allysono/deploy-in-k8s"
 def registryCredential = 'docker-hub'
 
+def command = """ls -lah"""
+def proc = command.execute()
+proc.waitFor()
+def list=proc.in.text.readLines() 
+
 def listServers = [
  srvH1: [name:"srvH1", user: 'peter-parker', ip: "10.225.35.106"],
  srvH2: [name:"srvH2", user: 'tony-stark', ip: "10.225.35.107"],
@@ -19,6 +24,9 @@ pipeline {
             choices:'peter-parker\ntony-stark\nhulk\n',
             description: 'Qual usuário você vai utilizar?'
             )
+        choice(name: "teste",
+            choices:${list}
+            description: 'Teste')
     }
     environment{
         srvH1 = "${listServers.srvH1.name}"
@@ -30,7 +38,7 @@ pipeline {
  stages{
         stage ('Clone do repositório') {
             steps{
-            checkout scm
+            sh 'git clone https://github.com/allysono/deploy-in-k8s.git && cd deploy-in-k8s'
             }
         }
 
