@@ -15,6 +15,9 @@ pipeline {
             choices:'srvH1\nsrvH2\nsrvH3\n',
             description: 'Qual ambiente de homologação você vai utilizar?'
             )
+        choice(name:'User',
+            choices:'peter-parker\ntony-stark\nhulk\n'
+            description: 'Qual usuário você vai utilizar?')
     }
     environment{
         srvH1 = "${listServers.srvH1.name}"
@@ -27,7 +30,7 @@ pipeline {
         stage('Docker Build  Image'){
             steps{
                 script {
-                    appimage = docker.build registry + ":" + getDockerTag()
+                    appimage = docker.build . registry + ":" + getDockerTag()
                 }
             }
         }
