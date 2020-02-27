@@ -60,20 +60,32 @@ pipeline {
            }
         }
         
+//         stage('Deploy to Kubernetes'){
+//             steps{
+//                 sshagent(credentials: ['jenkins']) {
+// 				    script{
+//                             sh "cp deploy/${params.Ambiente}/*.properties app.properties"
+//                             sh "ssh -o StrictHostKeyChecking=no ${listServers.find{ it.key == params.Ambiente }?.value.user}@${listServers.find{ it.key == params.Ambiente }?.value.ip} -p 22 'kubectl create -f golang-helloworld.yaml'"
+//                             sh 'cat app.properties'
+                       
+// 					}
+// 				}
+//             }
+//         }
+//     }
+// }
         stage('Deploy to Kubernetes'){
             steps{
-                sshagent(credentials: ['jenkins']) {
-				    script{
-                            sh "cp deploy/${params.Ambiente}/*.properties app.properties"
-                            sh "ssh -o StrictHostKeyChecking=no ${listServers.find{ it.key == params.Ambiente }?.value.user}@${listServers.find{ it.key == params.Ambiente }?.value.ip} -p 22 'kubectl create -f golang-helloworld.yaml'"
-                            sh 'cat app.properties'
-                       
-					}
-				}
-            }
-        }
-    }
-}
+                sshagent(credentials: [srvH1,srvH2,srvH3]) {
+                    script{
+                        user="${listServers.find{ it.key == params.Ambiente }?.value.user}"
+                        server="${listServers.find{ it.key == params.Ambiente }?.value.ip}"
+                        command="kubectl create -f golang-helloworld.yaml"
+                        sh "ssh  -o StrictHostKeyChecking=no $user@$server $command"                  
+                            }
+                        }
+                    }
+                }
 
 def getDockerTag(){
     def tag  = sh script: 'git rev-parse HEAD', returnStdout: true
